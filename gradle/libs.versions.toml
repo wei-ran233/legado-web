@@ -1,7 +1,7 @@
 [versions]
 
-kotlin = "2.3.10"
-ksp = "2.3.4"
+kotlin = "2.4.21"
+ksp = "2.3.12"
 agp = "8.13.2"
 
 # ==== 服务器端 (modules/engine + server) ====
