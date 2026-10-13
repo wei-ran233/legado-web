@@ -13,7 +13,7 @@
 </p>
 
 <p>
-  Fork 自 <a href="https://github.com/Luoyacheng/legado-E">Luoyacheng/legado-E</a>，基于开源阅读 <b>Legado (Sigma)</b> 核心规则引擎深度改造的<b>多用户在线书城服务器与现代化响应式 Web 阅读平台</b>。<br/>
+  基于 <a href="https://github.com/Luoyacheng/legado-E">Luoyacheng/legado-E</a> 与开源阅读 <b>Legado (Sigma)</b> 核心规则引擎深度重构与二次开发的<b>多用户在线书城服务器与现代化响应式 Web 阅读平台</b>。<br/>
   将强大的 Android 书源解析规则解耦为纯 JVM 引擎，结合现代 Ktor 异步服务与 Vue 3 前端，让您随时随地在任何设备（PC、手机、平板、墨水屏）享受极致的阅读与书源聚合体验。
 </p>
 
@@ -242,12 +242,18 @@
 
 ## 🤝 致谢与声明
 
-- 本项目由 [Luoyacheng/legado-E](https://github.com/Luoyacheng/legado-E) 与 [gedoor/legado](https://github.com/gedoor/legado) 延续二次开发而来。
-- 核心书源规则解析逻辑保留了原作者团队的精湛实现，特此向 Legado 原作团队致敬！
+- 本项目基于 [Luoyacheng/legado-E](https://github.com/Luoyacheng/legado-E) 与 [gedoor/legado](https://github.com/gedoor/legado) 延续二次开发与深度重构而来。
+- 核心书源规则解析逻辑保留了原作者团队的精湛实现，特此向 Legado 原作团队（gedoor）及 Legado-E 作者（Luoyacheng）致以崇高的敬意与感谢！
 - 免责声明：本项目为纯技术研究与多用户 Web 架构探索项目，不提供任何预置图书内容或侵权书源。书源规则由使用者自行导入，请遵守当地法律法规。
 
 ---
 
-## 📄 开源许可证
+## 📄 开源许可证与版权声明
 
-本项目遵循 [GNU General Public License v3.0 (GPL-3.0)](LICENSE) 开源协议。
+本项目遵循 [GNU General Public License v3.0 (GPL-3.0)](LICENSE) 开源协议发布。
+
+```
+Copyright (C) 2026 wei-ran233 <https://github.com/wei-ran233/legado-web>
+Copyright (C) 2024-2026 Luoyacheng <https://github.com/Luoyacheng/legado-E>
+Copyright (C) 2019-2023 gedoor <https://github.com/gedoor/legado>
+```
