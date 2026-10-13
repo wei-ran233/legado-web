@@ -3,16 +3,17 @@
 # Legado Web 多用户在线书城与阅读服务器
 
 <p>
-  <img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="License" />
+  <a href="https://github.com/wei-ran233/legado-web"><img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="License" /></a>
   <img src="https://img.shields.io/badge/Kotlin-2.0+-purple.svg" alt="Kotlin" />
   <img src="https://img.shields.io/badge/Vue-3.x-emerald.svg" alt="Vue 3" />
   <img src="https://img.shields.io/badge/Ktor-3.x-orange.svg" alt="Ktor" />
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg" alt="Docker" />
   <img src="https://img.shields.io/badge/Database-SQLite%20(WAL)-lightgrey.svg" alt="SQLite" />
+  <a href="https://github.com/wei-ran233/legado-web"><img src="https://img.shields.io/github/stars/wei-ran233/legado-web?style=social" alt="Stars" /></a>
 </p>
 
 <p>
-  基于开源阅读 <b>Legado (Sigma)</b> 深度重构的<b>多用户在线书城服务器与全功能响应式 Web 阅读平台</b>。<br/>
+  Fork 自 <a href="https://github.com/Luoyacheng/legado-E">Luoyacheng/legado-E</a>，基于开源阅读 <b>Legado (Sigma)</b> 核心规则引擎深度改造的<b>多用户在线书城服务器与现代化响应式 Web 阅读平台</b>。<br/>
   将强大的 Android 书源解析规则解耦为纯 JVM 引擎，结合现代 Ktor 异步服务与 Vue 3 前端，让您随时随地在任何设备（PC、手机、平板、墨水屏）享受极致的阅读与书源聚合体验。
 </p>
 
@@ -90,8 +91,8 @@
 
 1. **克隆代码并进入目录**：
    ```bash
-   git clone https://github.com/<your-username>/legado-E.git
-   cd legado-E
+   git clone https://github.com/wei-ran233/legado-web.git
+   cd legado-web
    ```
 
 2. **配置环境变量（可选）**：
