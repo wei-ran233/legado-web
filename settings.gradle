@@ -47,6 +47,15 @@ dependencyResolutionManagement {
 }
 rootProject.name = 'legado'
 
-include ':app'
-include ':modules:book'
-include ':modules:rhino'
+// 服务器端构建模式：-PserverOnly 或环境变量 SERVER_ONLY 存在时跳过 Android 模块
+// （无 Android SDK 的环境只构建纯 JVM 的 modules:engine 与 server）
+def serverOnly = settings.hasProperty('serverOnly') || System.getenv('SERVER_ONLY') != null
+
+include ':modules:engine'
+include ':server'
+
+if (!serverOnly) {
+    include ':app'
+    include ':modules:book'
+    include ':modules:rhino'
+}

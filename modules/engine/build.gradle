@@ -1,0 +1,44 @@
+// 纯 JVM 书源引擎：自 app 模块移植（AnalyzeRule/AnalyzeUrl/webBook 等），
+// 保留 io.legado.app 包名以最小化移植改动；Android 依赖已桩化，详见 EngineEnv。
+plugins {
+    alias libs.plugins.kotlin.jvm
+}
+
+kotlin {
+    // 使用本机完整 JDK 24 作为编译工具链（本机 jdk-17 缺失 jrt-fs.jar 无法被 Kotlin 识别）
+    jvmToolchain(24)
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets {
+    main {
+        java.srcDirs += "src/main/kotlin"
+    }
+}
+
+dependencies {
+    api libs.mozilla.rhino
+    api libs.gson
+    api libs.kotlinx.coroutines.core
+    api libs.okhttp
+    api libs.jsoup
+    api libs.json.path
+    api libs.jsoupxpath
+    api libs.commons.text
+    api libs.hutool.crypto
+    api libs.quick.chinese.transfer.core
+    // androidx.collection / androidx.annotation 均为纯 JVM 构件，可安全用于服务器
+    api libs.androidx.collection
+    api libs.androidx.annotation
+    implementation libs.kotlin.reflect
+
+    testImplementation libs.junit
+    testImplementation libs.kotlinx.coroutines.core
+}

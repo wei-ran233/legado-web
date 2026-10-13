@@ -1,21 +1,16 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from '@/router'
-import store from '@/store'
+import store, { useThemeStore } from '@/store'
 import 'element-plus/theme-chalk/dark/css-vars.css'
+import '@/assets/bookshelf.css'
+import '@/assets/themes.css'
 
-createApp(App).use(store).use(router).mount('#app')
-// 书架 同步Element PLUS 夜间模式
-watch(
-  () => useBookStore().isNight,
-  isNight => {
-    if (isNight) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  },
-)
+const app = createApp(App).use(store).use(router)
+app.mount('#app')
+
+// 初始化全局黑夜/日间模式
+useThemeStore().applyTheme()
 
 window.addEventListener('vite:preloadError', event => {
   event.preventDefault()

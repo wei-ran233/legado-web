@@ -10,6 +10,7 @@
       class="full"
       v-if="/^\s*<img[^>]*src[^>]+>$/.test(String(para))"
       :src="getImageSrc(para)"
+      referrerpolicy="no-referrer"
       @error.once="proxyImage"
       loading="lazy"
     />
@@ -48,7 +49,7 @@ const replaceImage = (content: string) => {
     if (dataUrl) {
       return dataUrl[0]
     }
-    if (isLegadoUrl(src)) {
+    if (isLegadoUrl(src) || src.includes(',{') || src.includes('cdndm5.com')) {
       const proxySrc = API.getProxyImageUrl(
         bookUrl.value,
         src,
@@ -61,12 +62,13 @@ const replaceImage = (content: string) => {
 }
 
 const getImageSrc = (content: string) => {
-  const src = content.match(imgPattern())![1] //reg tested in template
+  const m = content.match(imgPattern())
+  const src = m ? m[1] : ''
   const dataUrl = src.match(imgDataUrlPattern())
   if (dataUrl) {
       return dataUrl[0] //现成的base64图片，去掉阅读格式后缀
   }
-  if (isLegadoUrl(src))
+  if (isLegadoUrl(src) || src.includes(',{') || src.includes('cdndm5.com'))
     return API.getProxyImageUrl(
       bookUrl.value,
       src,

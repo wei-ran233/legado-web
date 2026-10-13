@@ -9,62 +9,7 @@ import API, {
 import ajax from './axios'
 import { validatorHttpUrl } from '@/utils/utils'
 
-import { createApp } from 'vue'
-import App from '@/App.vue'
-import store, { useConnectionStore } from '@/store'
 
-createApp(App).use(store)
-const connectionStore = useConnectionStore()
-
-const LeagdoApiResponseKeys: string[] = Array.of('isSuccess', 'errorMsg')
-
-const notification = ElMessage
-/** Axios.Interceptor: check if resp is LeagaoLeagdoApiResponse*/
-const responseCheckInterceptor = (resp: AxiosResponse) => {
-  let isLeagdoApiResponse = true
-  try {
-    const data = resp.data
-
-    for (const key of LeagdoApiResponseKeys) {
-      if (!(key in data)) {
-        isLeagdoApiResponse = false
-        LeagdoApiResponseKeys.length = 0
-      }
-    }
-    if ((data as LeagdoApiResponse<unknown>).isSuccess === true) {
-      if (!('data' in data)) {
-        isLeagdoApiResponse = false
-      }
-    }
-  } catch {
-    isLeagdoApiResponse = false
-  }
-  if (isLeagdoApiResponse === false) {
-    notification.warning({ message: '后端返回内容格式错误', grouping: true })
-    throw new Error()
-  }
-  connectionStore.setConnectType('primary')
-  connectionStore.setConnectStatus('已连接 ' + legado_http_entry_point)
-  return resp
-}
-
-const axiosErrorInterceptor = (err: unknown) => {
-  notification.error({
-    message: '后端连接失败，请检查阅读WEB服务或者设置其它可用链接',
-    grouping: true,
-  })
-  connectionStore.setConnectType('danger')
-  connectionStore.setConnectStatus('连接异常')
-  throw err
-}
-// http全局
-ajax.interceptors.response.use(responseCheckInterceptor, axiosErrorInterceptor)
-// websocket
-setWebsocketOnError(axiosErrorInterceptor)
-setWebsocketOnMessage(() => {
-  connectionStore.setConnectType('primary')
-  connectionStore.setConnectStatus('已连接 ' + legado_http_entry_point)
-})
 /**
  * 按照阅读的默认规则 解析阅读HTTP WebSocket API入口地址
  * @returns [http_url, webSocekt_url]

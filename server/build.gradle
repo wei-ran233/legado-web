@@ -1,0 +1,62 @@
+// Legado 多用户书城服务器：Ktor + Exposed + SQLite
+plugins {
+    alias libs.plugins.kotlin.jvm
+    id 'application'
+    alias libs.plugins.shadow
+}
+
+kotlin {
+    // 使用本机完整 JDK 24 作为编译工具链（本机 jdk-17 缺失 jrt-fs.jar 无法被 Kotlin 识别）
+    jvmToolchain(24)
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+application {
+    mainClass.set('io.legado.app.server.ApplicationKt')
+}
+
+dependencies {
+    implementation project(':modules:engine')
+
+    implementation libs.ktor.server.core
+    implementation libs.ktor.server.netty
+    implementation libs.ktor.server.content.negotiation
+    implementation libs.ktor.serialization.gson
+    implementation libs.ktor.server.auth
+    implementation libs.ktor.server.auth.jwt
+    implementation libs.ktor.server.websockets
+    implementation libs.ktor.server.cors
+    implementation libs.ktor.server.status.pages
+    implementation libs.ktor.server.call.logging
+    implementation libs.ktor.server.forwarded.header
+    implementation libs.ktor.server.sse
+
+    implementation libs.exposed.core
+    implementation libs.exposed.jdbc
+    implementation libs.exposed.java.time
+    implementation libs.sqlite.jdbc
+    implementation libs.java.jwt
+    implementation libs.caffeine
+    implementation libs.logback.classic
+    implementation libs.kotlin.reflect
+
+    testImplementation libs.junit
+    testImplementation libs.ktor.server.test.host
+}
+
+// shadowJar: java -jar legado-server-all.jar
+tasks.named('shadowJar') {
+    archiveBaseName.set('legado-server')
+    archiveClassifier.set('all')
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': 'io.legado.app.server.ApplicationKt'
+    }
+}

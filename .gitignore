@@ -18,3 +18,11 @@ package-lock.json
 .kotlin/
 .cxx
 .vscode
+
+# Server runtime data & cache
+data/
+server-smoke-data/
+*.db
+*.db*
+*.pid
+cleaner.pid
