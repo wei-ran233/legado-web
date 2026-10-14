@@ -63,7 +63,7 @@ object EngineDbBinding {
                 BookRepository.getChapter(bookUrl, index)
 
             override fun update(vararg bookChapter: BookChapter) {
-                // 章节更新由 refreshToc 批量处理
+                BookRepository.updateChapters(*bookChapter)
             }
 
             override fun upWordCount(bookUrl: String, url: String, wordCount: String) {

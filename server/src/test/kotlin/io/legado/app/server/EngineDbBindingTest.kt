@@ -47,6 +47,45 @@ class EngineDbBindingTest {
     }
 
     @Test
+    fun chapterMutationsPersistAndKeepCacheNamesConsistent() {
+        val first = BookChapter(bookUrl = "book", url = "read/0", title = "Old", index = 0)
+        val neighbor = BookChapter(bookUrl = "book", url = "read/0", title = "Neighbor", index = 1)
+        BookRepository.replaceChapters("book", listOf(first, neighbor))
+        val oldFileName = first.getFileName()
+        first.title = "Updated"
+        first.resourceUrl = "https://example.com/audio.mp3"
+        first.update()
+        first.putLyric("line one")
+        first.putDanmaku("comment")
+        first.putImgUrl("https://example.com/cover.jpg")
+
+        val reloaded = EngineDb.bookChapterDao.getChapter("book", 0)!!
+        assertEquals("Updated", reloaded.title)
+        assertEquals(first.resourceUrl, reloaded.resourceUrl)
+        assertEquals("line one", reloaded.getVariable("lyric"))
+        assertEquals("comment", reloaded.getVariable("danmaku"))
+        assertEquals(first.imgUrl, reloaded.imgUrl)
+        assertNotEquals(oldFileName, first.getFileName())
+        assertEquals(first.getFileName(), reloaded.getFileName())
+        assertEquals("Neighbor", EngineDb.bookChapterDao.getChapter("book", 1)!!.title)
+    }
+
+    @Test
+    fun chapterMetadataMigrationPreservesLegacyDataAndIsIdempotent() {
+        BookRepository.replaceChapters("legacy", listOf(BookChapter(bookUrl = "legacy", title = "Legacy title", index = 0)))
+        transaction {
+            exec("ALTER TABLE chapters DROP COLUMN img_url")
+            DatabaseFactory.migrateChapterMetadata()
+            DatabaseFactory.migrateChapterMetadata()
+        }
+        val restored = EngineDb.bookChapterDao.getChapter("legacy", 0)!!
+        assertEquals("Legacy title", restored.title)
+        assertNull(restored.imgUrl)
+        restored.putImgUrl("https://example.com/image.jpg")
+        assertEquals(restored.imgUrl, EngineDb.bookChapterDao.getChapter("legacy", 0)!!.imgUrl)
+    }
+
+    @Test
     fun okhttpCookieCleanupPreservesSourceCookies() {
         EngineDb.cookieDao.insert(Cookie("example.com", "session=source"), Cookie("example.com|session", "session=http"))
         assertEquals("session=source", EngineDb.cookieDao.get("example.com")!!.cookie)

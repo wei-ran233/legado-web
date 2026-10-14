@@ -707,6 +707,7 @@ import {
 import { recordReadingTime } from '@/api/ranking'
 import { tokenStore } from '@/api/axios'
 import { useThemeStore } from '@/store/themeStore'
+import { isChapterPageUrl } from '@/utils/comicImage'
 import {
   getCachedChapter,
   saveCachedChapter,
@@ -887,6 +888,7 @@ function isLikelyDummyOrHtml(rawUrl: string): boolean {
   if (clean.endsWith('.html') || clean.endsWith('.htm') || clean.endsWith('.php') || clean.endsWith('.aspx') || clean.endsWith('.ashx')) {
     return true
   }
+  if (isChapterPageUrl(rawUrl, chapter.value?.url)) return true
   const cleanBook = (bookUrl.value || '').split(/,\s*\{/)[0].trim().toLowerCase()
   if (cleanBook && clean === cleanBook) return true
   return false
@@ -1541,7 +1543,7 @@ const prefetchNextChapters = (currentIndex: number) => {
     getBookContent(currentUrl, i)
       .then(res => {
         if (res && res.content && currentUrl === bookUrl.value) {
-          saveCachedChapter(currentUrl, i, res.title, adaptFontText(res.content))
+          saveCachedChapter(currentUrl, i, res.title, adaptFontText(res.content), res.url)
         }
       })
       .catch(() => {})
@@ -1555,7 +1557,7 @@ const loadChapter = async (index: number, options?: { toLastPage?: boolean; init
       const cached = await getCachedChapter(bookUrl.value, index)
       if (cached && cached.content) {
         const cleanContent = adaptFontText(cached.content)
-        chapter.value = { index: cached.index, title: cached.title, isVolume: false }
+        chapter.value = { index: cached.index, title: cached.title, isVolume: false, url: cached.url ?? toc.value.find(c => c.index === cached.index)?.url }
         content.value = cleanContent
         chapterIndex.value = index
         sliderChapter.value = index + 1
@@ -1572,7 +1574,7 @@ const loadChapter = async (index: number, options?: { toLastPage?: boolean; init
     loadingContent.value = true
     const payload = await getBookContent(bookUrl.value, index)
     const cleanContent = adaptFontText(payload.content)
-    chapter.value = { index: payload.index, title: payload.title, isVolume: false }
+    chapter.value = { index: payload.index, title: payload.title, isVolume: false, url: payload.url ?? toc.value.find(c => c.index === payload.index)?.url }
     content.value = cleanContent
     chapterIndex.value = index
     sliderChapter.value = index + 1
@@ -1580,7 +1582,7 @@ const loadChapter = async (index: number, options?: { toLastPage?: boolean; init
 
     // 异步写入本地缓存并预加载后 3 章
     if (bookUrl.value && cleanContent) {
-      saveCachedChapter(bookUrl.value, index, payload.title, cleanContent)
+      saveCachedChapter(bookUrl.value, index, payload.title, cleanContent, chapter.value.url)
     }
 
     await applyReaderPosition(options)
@@ -2583,8 +2585,9 @@ watch(volumeKeyPage, (enabled) => {
 })
 
 watch(toc, t => {
-  if (t.length && chapterIndex.value === 0 && chapter.value) {
-    chapter.value = t[chapter.value.index] ?? chapter.value
+  if (chapter.value) {
+    const item = t.find(c => c.index === chapter.value!.index)
+    if (item && !chapter.value.url) chapter.value = { ...chapter.value, url: item.url }
   }
 })
 

@@ -143,6 +143,7 @@ object Chapters : Table("chapters") {
     val start = long("start").nullable()
     val end = long("end").nullable()
     val variable = text("variable").nullable()
+    val imgUrl = text("img_url").nullable()
     override val primaryKey = PrimaryKey(bookUrl, chapterIndex)
 }
 

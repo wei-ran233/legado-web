@@ -43,6 +43,7 @@ export interface SearchBookItem {
 }
 
 export interface ChapterItem {
+  url?: string
   index: number
   title: string
   isVolume: boolean
@@ -50,6 +51,7 @@ export interface ChapterItem {
 }
 
 export interface ContentPayload {
+  url?: string
   index: number
   title: string
   content: string

@@ -64,6 +64,7 @@ data class BookChapter(
     }
 
     fun update() {
+        titleMD5 = null
         EngineDb.bookChapterDao.update(this)
     }
 

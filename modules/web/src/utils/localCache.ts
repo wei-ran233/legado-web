@@ -9,6 +9,7 @@ const STORE_CHAPTERS = 'chapter_content'
 const STORE_SOURCES = 'book_sources'
 
 export interface CachedChapter {
+  url?: string
   bookUrl: string
   index: number
   title: string
@@ -124,10 +125,12 @@ export async function saveCachedChapter(
   index: number,
   title: string,
   content: string,
+  url?: string,
 ): Promise<void> {
   const cleanContent = adaptFontText(content)
   const id = `${bookUrl}__${index}`
   const entry: CachedChapter = {
+    url,
     bookUrl,
     index,
     title,
@@ -156,7 +159,7 @@ export async function saveCachedChapter(
 export async function getCachedChapter(
   bookUrl: string,
   index: number,
-): Promise<{ index: number; title: string; content: string } | null> {
+): Promise<Pick<CachedChapter, 'index' | 'title' | 'content' | 'url'> | null> {
   const id = `${bookUrl}__${index}`
   const mem = memoryChapters.get(id)
   if (mem) {
@@ -164,7 +167,7 @@ export async function getCachedChapter(
       memoryChapters.delete(id)
       return null
     }
-    return { index: mem.index, title: mem.title, content: adaptFontText(mem.content) }
+    return { index: mem.index, title: mem.title, content: adaptFontText(mem.content), url: mem.url }
   }
 
   const db = await getDb()
@@ -190,7 +193,7 @@ export async function getCachedChapter(
           }
           const adapted = adaptFontText(val.content)
           memoryChapters.set(id, { ...val, content: adapted })
-          resolve({ index: val.index, title: val.title, content: adapted })
+          resolve({ index: val.index, title: val.title, content: adapted, url: val.url })
         } else {
           resolve(null)
         }

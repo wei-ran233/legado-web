@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         working-directory: modules/web
         run: pnpm install --frozen-lockfile
+      - name: Verify comic URL filtering and cached metadata
+        working-directory: modules/web
+        run: node --experimental-strip-types --test tests/comicImage.test.ts
       - name: Type-check and build Web frontend
         working-directory: modules/web
         run: pnpm build
