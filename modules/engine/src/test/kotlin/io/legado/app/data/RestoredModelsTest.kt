@@ -8,6 +8,7 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import org.junit.Assert.*
 import org.junit.Test
+import java.time.LocalDate
 
 class RestoredModelsTest {
     @Test
@@ -34,8 +35,10 @@ class RestoredModelsTest {
         assertEquals(search.infoHtml, book.infoHtml)
         assertEquals(search.tocHtml, book.tocHtml)
         assertEquals("value", book.getVariable("token"))
+        book.config.startDate = LocalDate.of(2026, 10, 14)
         val decoded = GSON.fromJsonObject<Book>(GSON.toJson(book)).getOrThrow()
         assertEquals("value", decoded.getVariable("token"))
+        assertEquals(book.config.startDate, decoded.config.startDate)
     }
 
     @Test

@@ -2,6 +2,7 @@ package io.legado.app.utils
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -12,6 +13,8 @@ import com.google.gson.ToNumberPolicy
 import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonWriter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import io.legado.app.data.entities.rule.BookInfoRule
 import io.legado.app.data.entities.rule.ContentRule
 import io.legado.app.data.entities.rule.ExploreRule
@@ -23,10 +26,12 @@ import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.lang.reflect.Type
+import java.time.LocalDate
 import kotlin.math.ceil
 
 val INITIAL_GSON: Gson by lazy {
     GsonBuilder()
+        .registerTypeAdapter(LocalDate::class.java, LocalDateJsonAdapter())
         .registerTypeAdapter(
             object : TypeToken<Map<String?, Any?>?>() {}.type,
             MapDeserializerDoubleAsIntFix()
@@ -241,4 +246,18 @@ class MapDeserializerDoubleAsIntFix :
         return null
     }
 
+}
+/** Java time must use its public ISO representation, not reflective access to JDK internals. */
+private class LocalDateJsonAdapter : TypeAdapter<LocalDate>() {
+    override fun write(out: JsonWriter, value: LocalDate?) {
+        if (value == null) out.nullValue() else out.value(value.toString())
+    }
+
+    override fun read(reader: JsonReader): LocalDate? {
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull()
+            return null
+        }
+        return LocalDate.parse(reader.nextString())
+    }
 }
