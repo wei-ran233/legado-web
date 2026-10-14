@@ -1,6 +1,5 @@
 package io.legado.app.data.entities.rule
 
-import com.google.android.flexbox.FlexboxLayout
 
 data class FlexChildStyle(
     val layout_flexGrow: Float = 0F,
