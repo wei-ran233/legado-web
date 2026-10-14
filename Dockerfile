@@ -5,8 +5,8 @@ COPY gradle/ gradle/
 COPY settings.gradle build.gradle gradle.properties ./
 COPY modules/engine/ modules/engine/
 COPY server/ server/
-# serverOnly 模式：跳过 Android 模块（无需 Android SDK）
-RUN SERVER_ONLY=1 gradle :server:installDist --no-daemon
+# 仅构建纯 JVM 服务端（无需 Android SDK）
+RUN gradle :server:installDist --no-daemon
 
 FROM node:20-slim AS frontend-build
 WORKDIR /build

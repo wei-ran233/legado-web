@@ -1,5 +1,6 @@
 name: Update Cronet
 
+# Legacy Android workflow retained for reference; Web/JVM builds use test.yml and web.yml.
 on:
   schedule:
   # 周一北京时间9点
@@ -8,8 +9,8 @@ on:
 
 jobs:
   build:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'Luoyacheng/legado' }}
     steps:
       - uses: actions/checkout@v5
 

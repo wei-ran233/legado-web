@@ -1,5 +1,6 @@
 name: Release Build
 
+# Legacy Android workflow retained for reference; Web/JVM builds use test.yml and web.yml.
 on:
 #  push:
 #    branches:
@@ -10,8 +11,8 @@ on:
 
 jobs:
   prepare:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     outputs:
       version: ${{ steps.set-ver.outputs.version }}
       play: ${{ steps.check.outputs.play }}
@@ -30,8 +31,8 @@ jobs:
           fi
 
   build:
+    if: ${{ false }}
     needs: prepare
-    if: ${{ needs.prepare.outputs.sign }}
     strategy:
       matrix:
         product: [ app, google ]
