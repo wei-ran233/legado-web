@@ -29,3 +29,25 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :modules:engine:test :server:test :server:installDist --no-daemon
+      - name: Verify packaged server starts and accepts admin login
+        run: |
+          smoke_data=$(mktemp -d)
+          JWT_SECRET="$(openssl rand -hex 32)" ADMIN_PASSWORD=ci-smoke-only DATA_DIR="$smoke_data" PORT=18080 \
+            server/build/install/server/bin/server > "$RUNNER_TEMP/server-smoke.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:18080/api/health > "$RUNNER_TEMP/health.json"; then
+              break
+            fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              cat "$RUNNER_TEMP/server-smoke.log"
+              exit 1
+            fi
+            sleep 1
+          done
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["isSuccess"] and d["data"] == "ok"' "$RUNNER_TEMP/health.json"
+          curl --silent --show-error --fail -X POST http://127.0.0.1:18080/api/auth/login \
+            -H 'Content-Type: application/json' -d '{"username":"admin","password":"ci-smoke-only"}' \
+            -o "$RUNNER_TEMP/login.json"
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["isSuccess"] and d["data"]["access_token"]' "$RUNNER_TEMP/login.json"
