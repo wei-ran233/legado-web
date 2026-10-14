@@ -1357,7 +1357,332 @@ const selectTheme = (tVal: string) => {
     theme.value = tVal
   }
 }
-…2645 tokens truncated…sis.pause()
+
+watch(() => themeStore.isDark, (isDark) => {
+  if (isDark) {
+    theme.value = userDarkTheme.value || 'night'
+  } else {
+    theme.value = userLightTheme.value || 'paper'
+  }
+})
+
+const updatePageCount = () => {
+  if (readMode.value !== 'page' || mediaMode.value !== 'text') return
+  const vp = pageViewportRef.value
+  const flow = pageFlowRef.value
+  if (!vp || !flow) return
+  const w = vp.clientWidth
+  if (!w) return
+  viewportWidth.value = w
+  const gap = 32
+  const scrollW = flow.scrollWidth
+  const pages = Math.max(1, Math.ceil((scrollW + gap) / (w + gap)))
+  totalPages.value = pages
+  if (currentPage.value >= pages) {
+    currentPage.value = pages - 1
+  }
+}
+
+const fontFamilies = [
+  { value: 'system', label: '默认黑体' },
+  { value: 'serif', label: '宋体衬线' },
+  { value: 'kaiti', label: '优雅楷体' },
+]
+
+const darkThemeValues = ['night', 'navy', 'dark-green', 'dark-purple', 'dark-coffee']
+try {
+  const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+  fontSize.value = saved.fontSize ?? 20
+  lineHeight.value = saved.lineHeight ?? 1.8
+  pageWidth.value = saved.pageWidth ?? 85
+  fontFamily.value = saved.fontFamily ?? 'system'
+  volumeKeyPage.value = saved.volumeKeyPage ?? true
+
+  userLightTheme.value = saved.userLightTheme || saved.userDayTheme || (saved.theme && !darkThemeValues.includes(saved.theme) ? saved.theme : 'paper')
+  userDarkTheme.value = saved.userDarkTheme || (saved.theme && darkThemeValues.includes(saved.theme) ? saved.theme : 'night')
+
+  if (themeStore.isDark) {
+    theme.value = userDarkTheme.value
+  } else {
+    theme.value = userLightTheme.value
+  }
+
+  if (saved.readMode === 'page' || saved.readMode === 'scroll') {
+    readMode.value = saved.readMode
+  } else {
+    readMode.value = 'scroll'
+  }
+} catch { /* ignore */ }
+
+watch([fontSize, lineHeight, pageWidth, theme, fontFamily, readMode, volumeKeyPage, userLightTheme, userDarkTheme], () => {
+  saveSettings()
+  nextTick(updatePageCount)
+})
+
+function saveSettings() {
+  localStorage.setItem(
+    SETTINGS_KEY,
+    JSON.stringify({
+      version: SETTINGS_VERSION,
+      fontSize: fontSize.value,
+      lineHeight: lineHeight.value,
+      pageWidth: pageWidth.value,
+      theme: theme.value,
+      userLightTheme: userLightTheme.value,
+      userDarkTheme: userDarkTheme.value,
+      fontFamily: fontFamily.value,
+      readMode: readMode.value,
+      volumeKeyPage: volumeKeyPage.value,
+    }),
+  )
+}
+
+const onReadModeChange = () => {
+  saveSettings()
+  nextTick(() => {
+    if (readMode.value === 'page') {
+      if (pageViewportRef.value && resizeObserver) {
+        resizeObserver.observe(pageViewportRef.value)
+      }
+      updatePageCount()
+    }
+  })
+}
+
+const toggleReadMode = () => {
+  readMode.value = readMode.value === 'page' ? 'scroll' : 'page'
+  onReadModeChange()
+  ElMessage.success(`已切换为${readMode.value === 'page' ? '分页' : '滚动'}浏览模式`)
+}
+
+const onSliderChange = (val: number | number[]) => {
+  const num = Array.isArray(val) ? val[0] : val
+  if (typeof num === 'number' && num >= 1 && num <= toc.value.length) {
+    jumpTo(num - 1)
+  }
+}
+
+const contentStyle = computed(() => ({
+  fontSize: `${fontSize.value}px`,
+  lineHeight: `${lineHeight.value}`,
+  maxWidth: isMobile.value ? '100%' : `${pageWidth.value}%`,
+}))
+
+const paragraphs = computed(() =>
+  content.value.split(/\n+/).map(s => adaptFontText(s).trim()).filter(Boolean),
+)
+
+const filteredToc = computed(() => {
+  const kw = chapterFilter.value.trim()
+  if (!kw) return toc.value
+  return toc.value.filter(c => c.title.includes(kw))
+})
+
+// ===== 数据加载 =====
+const tocError = ref('')
+
+const loadToc = async () => {
+  tocLoading.value = true
+  tocError.value = ''
+  try {
+    const res = await getToc(bookUrl.value)
+    toc.value = res
+    if (res.length === 0) {
+      tocError.value = '目录为空，该书源暂无可读章节'
+    }
+  } catch (e: any) {
+    const msg = e?.response?.data?.errorMsg || e.message || '目录加载失败'
+    tocError.value = msg
+    ElMessage.error(msg)
+  } finally {
+    tocLoading.value = false
+  }
+}
+
+const retryLoad = async () => {
+  await loadToc()
+  if (toc.value.length > 0) {
+    await loadChapter(0)
+  }
+}
+
+const applyReaderPosition = async (options?: { toLastPage?: boolean; initialPos?: number }) => {
+  await nextTick()
+  if (readMode.value === 'page' && mediaMode.value === 'text') {
+    updatePageCount()
+    if (options?.toLastPage) {
+      currentPage.value = Math.max(0, totalPages.value - 1)
+    } else if (typeof options?.initialPos === 'number' && options.initialPos > 0) {
+      currentPage.value = Math.min(totalPages.value - 1, options.initialPos)
+    } else {
+      currentPage.value = 0
+    }
+  } else if (mediaMode.value === 'text') {
+    await nextTick()
+    const sc = scrollContainerRef.value
+    if (sc) {
+      sc.style.scrollBehavior = 'auto'
+      if (options?.toLastPage) {
+        sc.scrollTop = Math.max(0, sc.scrollHeight - sc.clientHeight)
+      } else if (typeof options?.initialPos === 'number' && options.initialPos > 0) {
+        sc.scrollTop = options.initialPos
+      } else {
+        sc.scrollTop = 0
+      }
+      sc.style.scrollBehavior = ''
+    }
+  }
+}
+
+const prefetchNextChapters = (currentIndex: number) => {
+  if (!bookUrl.value || toc.value.length === 0) return
+  const currentUrl = bookUrl.value
+  for (let i = currentIndex + 1; i <= Math.min(currentIndex + 3, toc.value.length - 1); i++) {
+    getBookContent(currentUrl, i)
+      .then(res => {
+        if (res && res.content && currentUrl === bookUrl.value) {
+          saveCachedChapter(currentUrl, i, res.title, adaptFontText(res.content))
+        }
+      })
+      .catch(() => {})
+  }
+}
+
+const loadChapter = async (index: number, options?: { toLastPage?: boolean; initialPos?: number }) => {
+  try {
+    // 1. 优先读取本地 IndexedDB 缓存（0ms 秒开，自动解码 PUA 字符）
+    if (bookUrl.value) {
+      const cached = await getCachedChapter(bookUrl.value, index)
+      if (cached && cached.content) {
+        const cleanContent = adaptFontText(cached.content)
+        chapter.value = { index: cached.index, title: cached.title, isVolume: false }
+        content.value = cleanContent
+        chapterIndex.value = index
+        sliderChapter.value = index + 1
+        detectMediaMode()
+        loadingContent.value = false
+        await applyReaderPosition(options)
+        scheduleProgressSave()
+        prefetchNextChapters(index)
+        return
+      }
+    }
+
+    // 2. 缓存未命中，发起网络加载
+    loadingContent.value = true
+    const payload = await getBookContent(bookUrl.value, index)
+    const cleanContent = adaptFontText(payload.content)
+    chapter.value = { index: payload.index, title: payload.title, isVolume: false }
+    content.value = cleanContent
+    chapterIndex.value = index
+    sliderChapter.value = index + 1
+    detectMediaMode()
+
+    // 异步写入本地缓存并预加载后 3 章
+    if (bookUrl.value && cleanContent) {
+      saveCachedChapter(bookUrl.value, index, payload.title, cleanContent)
+    }
+
+    await applyReaderPosition(options)
+    scheduleProgressSave()
+    prefetchNextChapters(index)
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.errorMsg || '正文加载失败')
+  } finally {
+    loadingContent.value = false
+  }
+}
+
+// ===== 文本选中浮动工具条 =====
+const selVisible = ref(false)
+const selX = ref(0)
+const selY = ref(0)
+let selText = ''
+
+const onSelectionChange = () => {
+  const sel = window.getSelection()
+  if (!sel || sel.isCollapsed || !selText_get(sel)) {
+    selVisible.value = false
+    return
+  }
+  const range = sel.getRangeAt(0)
+  const rect = range.getBoundingClientRect()
+  selText = sel.toString()
+  selX.value = Math.min(Math.max(rect.left + rect.width / 2 - 120, 8), window.innerWidth - 260)
+  selY.value = Math.max(rect.top - 48, 8)
+  selVisible.value = true
+}
+
+function selText_get(sel: Selection): string {
+  const anchor = (sel as Selection).anchorNode
+  if (!anchor) return ''
+  const el = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as HTMLElement)
+  if (!el?.closest('.content, .page-flow')) return ''
+  return sel.toString()
+}
+
+const copySelection = async () => {
+  if (!selText) return
+  try {
+    await navigator.clipboard.writeText(selText)
+    ElMessage.success('已复制选中内容')
+  } catch {
+    const ta = document.createElement('textarea')
+    ta.value = selText
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    ElMessage.success('已复制选中内容')
+  }
+  selVisible.value = false
+  window.getSelection()?.removeAllRanges()
+}
+
+const searchWebSelection = () => {
+  if (!selText) return
+  window.open(`https://www.baidu.com/s?wd=${encodeURIComponent(selText)}`, '_blank')
+  selVisible.value = false
+}
+
+// ===== 语音朗读 (TTS) =====
+const isSpeaking = ref(false)
+const isPaused = ref(false)
+
+const speakSelection = () => {
+  const textToSpeak = selText.trim() || paragraphs.value.join('\n')
+  if (!textToSpeak) return
+  if (!('speechSynthesis' in window)) {
+    ElMessage.warning('当前浏览器暂不支持语音朗读')
+    return
+  }
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(textToSpeak)
+  utterance.lang = 'zh-CN'
+  utterance.rate = 1.0
+  utterance.onstart = () => {
+    isSpeaking.value = true
+    isPaused.value = false
+  }
+  utterance.onend = () => {
+    isSpeaking.value = false
+    isPaused.value = false
+  }
+  utterance.onerror = () => {
+    isSpeaking.value = false
+    isPaused.value = false
+  }
+  window.speechSynthesis.speak(utterance)
+  selVisible.value = false
+}
+
+const pauseSpeak = () => {
+  if (window.speechSynthesis.speaking) {
+    if (isPaused.value) {
+      window.speechSynthesis.resume()
+      isPaused.value = false
+    } else {
+      window.speechSynthesis.pause()
       isPaused.value = true
     }
   }
