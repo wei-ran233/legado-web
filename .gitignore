@@ -26,6 +26,5 @@ server-smoke-data/
 *.db*
 *.pid
 cleaner.pid
-
 # Do not reintroduce inherited Firebase client configuration
 **/google-services.json
