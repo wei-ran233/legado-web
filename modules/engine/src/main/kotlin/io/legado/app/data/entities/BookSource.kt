@@ -17,7 +17,7 @@ import io.legado.app.utils.splitNotBlank
 
 data class BookSource(
     // 地址，包括 http/https
-    
+
     var bookSourceUrl: String = "",
     // 名称
     var bookSourceName: String = "",
@@ -29,18 +29,18 @@ data class BookSource(
     // 详情页url正则
     var bookUrlPattern: String? = null,
     // 手动排序编号
-    
+
     var customOrder: Int = 0,
     // 是否启用
-    
+
     var enabled: Boolean = true,
     // 启用发现
-    
+
     var enabledExplore: Boolean = true,
     // js库
     override var jsLib: String? = null,
     // 启用okhttp CookieJAr 自动保存每次请求的cookie
-    
+
     override var enabledCookieJar: Boolean? = true,
     // 并发率
     override var concurrentRate: String? = null,
@@ -82,9 +82,9 @@ data class BookSource(
     var ruleContent: ContentRule? = null,
     // 段评规则
     var ruleReview: ReviewRule? = null,
-    
+
     var eventListener: Boolean = false, // 是否监听事件来执行回调规则
-    
+
     var customButton: Boolean = false //由书源控制的自定义按钮
 ) : BaseSource {
 

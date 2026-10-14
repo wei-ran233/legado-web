@@ -6,40 +6,40 @@ import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 data class ReplaceRule(
-    
+
     var id: Long = System.currentTimeMillis(),
     //名称
-    
+
     var name: String = "",
     //分组
     var group: String? = null,
     //替换内容
-    
+
     var pattern: String = "",
     //替换为
-    
+
     var replacement: String = "",
     //作用范围
     var scope: String? = null,
     //作用于标题
-    
+
     var scopeTitle: Boolean = false,
     //作用于正文
-    
+
     var scopeContent: Boolean = true,
     //排除范围
     var excludeScope: String? = null,
     //是否启用
-    
+
     var isEnabled: Boolean = true,
     //是否正则
-    
+
     var isRegex: Boolean = true,
     //超时时间
-    
+
     var timeoutMillisecond: Long = 3000L,
     //排序
-    
+
     var order: Int = Int.MIN_VALUE
 ) {
 

@@ -5,7 +5,7 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 
 data class SearchBook(
-    
+
     override var bookUrl: String = "",
     /** 书源 */
     var origin: String = "",
@@ -25,9 +25,9 @@ data class SearchBook(
     override var variable: String? = null,
     var originOrder: Int = 0,
     var chapterWordCountText: String? = null,
-    
+
     var chapterWordCount: Int = -1,
-    
+
     var respondTime: Int = -1
 ) : BaseBook, Comparable<SearchBook> {
 
@@ -65,8 +65,6 @@ data class SearchBook(
         }
         return "无最新章节"
     }
-
-
 
     fun releaseHtmlData() {
         infoHtml = null

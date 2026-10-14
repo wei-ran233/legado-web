@@ -80,11 +80,11 @@ interface BaseSource : JsExtensions {
     /**
      * 调用login函数 实现登录请求
      */
-    
+
     fun login() {
         val loginJs = getLoginJs()
         if (!loginJs.isNullOrBlank()) {
-            
+
             val js = """$loginJs
                 if(typeof login=='function'){
                     login.apply(this);
@@ -133,7 +133,7 @@ interface BaseSource : JsExtensions {
     /**
      * 获取用于登录的头部信息
      */
-    
+
     fun getLoginHeader(): String? {
         return CacheManager.get("loginHeader_${getKey()}")
     }
@@ -164,7 +164,7 @@ interface BaseSource : JsExtensions {
      * 获取用户信息,可以用来登录
      * 用户信息采用aes加密存储
      */
-    
+
     fun getLoginInfo(): String? {
         try {
             val key = AppConst.androidId.encodeToByteArray(0, 16)
@@ -215,7 +215,7 @@ interface BaseSource : JsExtensions {
     /**
      * 保存用户信息,aes加密
      */
-    
+
     fun putLoginInfo(info: String): Boolean {
         return try {
             val key = (AppConst.androidId).encodeToByteArray(0, 16)
@@ -248,7 +248,7 @@ interface BaseSource : JsExtensions {
      * 设置自定义变量
      * 新,统一为put名称存变量
      */
-    
+
     fun putVariable(variable: String?) {
         if (variable != null) {
             CacheManager.put("sourceVariable_${getKey()}", variable)
@@ -260,7 +260,7 @@ interface BaseSource : JsExtensions {
     /**
      * 获取自定义变量
      */
-    
+
     fun getVariable(): String {
         return CacheManager.get("sourceVariable_${getKey()}") ?: ""
     }
@@ -268,7 +268,7 @@ interface BaseSource : JsExtensions {
     /**
      * 保存数据
      */
-    
+
     fun put(key: String, value: String): String {
         CacheManager.put("v_${getKey()}_${key}", value)
         return value
@@ -277,7 +277,7 @@ interface BaseSource : JsExtensions {
     /**
      * 获取保存的数据
      */
-    
+
     fun get(key: String): String {
         return CacheManager.get("v_${getKey()}_${key}") ?: ""
     }

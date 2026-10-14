@@ -1,6 +1,5 @@
 package io.legado.app.data.entities.rule
 
-
 data class FlexChildStyle(
     val layout_flexGrow: Float = 0F,
     val layout_flexShrink: Float = 1F,
@@ -22,8 +21,6 @@ data class FlexChildStyle(
             else -> -1
         }
     }
-
-
 
     companion object {
         val defaultStyle = FlexChildStyle()
