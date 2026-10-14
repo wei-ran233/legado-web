@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.upsert
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 
 /**
  * 将 Exposed 实现注入引擎的 EngineDb 抽象，服务器启动时调用。
@@ -90,6 +91,10 @@ object EngineDbBinding {
 
             override fun delete(url: String) {
                 transaction { Cookies.deleteWhere { Cookies.domain eq url } }
+            }
+
+            override fun deleteOkHttp() {
+                transaction { Cookies.deleteWhere { Cookies.domain like "%|%" } }
             }
         }
     }
