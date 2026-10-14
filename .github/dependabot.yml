@@ -1,13 +1,10 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
+# Keep routine upgrades small; review toolchain migrations separately.
+# Security updates use GitHub's separate mechanism and PR limits.
 version: 2
+
 registries:
   maven-google:
     type: maven-repository
-    # url: https://maven.google.com
     url: https://dl.google.com/dl/android/maven2/
     password: dummy
     username: dummy
@@ -26,20 +23,92 @@ updates:
   - package-ecosystem: gradle
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: monthly
     registries: "*"
-    open-pull-requests-limit: 20
+    open-pull-requests-limit: 3
+    # Major upgrades (including AGP and Shadow) require a migration PR.
+    allow:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    # Existing version pins require compatibility review before routine upgrades.
+    ignore:
+      - dependency-name: "cn.hutool:hutool-crypto"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "org.mozilla:rhino"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "org.jsoup:jsoup"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "org.apache.commons:commons-text"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
     groups:
       kotlin_KSP:
+        applies-to: version-updates
         patterns:
           - "org.jetbrains.kotlin:*"
+          - "org.jetbrains.kotlin.*"
           - "com.google.devtools.ksp"
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
+          - "com.google.devtools.ksp:*"
+        update-types: ["minor", "patch"]
+      server-libraries:
+        applies-to: version-updates
+        patterns:
+          - "io.ktor:*"
+          - "org.jetbrains.exposed:*"
+          - "org.xerial:sqlite-jdbc"
+          - "com.auth0:java-jwt"
+          - "ch.qos.logback:*"
+          - "com.github.ben-manes.caffeine:*"
+          - "org.jetbrains.kotlinx:*"
+          - "com.squareup.okhttp3:*"
+          - "com.google.code.gson:*"
+          - "com.jayway.jsonpath:*"
+          - "cn.wanghaomiao:*"
+        update-types: ["minor", "patch"]
+      android-libraries:
+        applies-to: version-updates
+        patterns:
+          - "androidx.*"
+          - "com.android.*"
+          - "com.google.android.*"
+          - "com.google.firebase:*"
+          - "com.google.gms.*"
+          - "com.github.bumptech.glide:*"
+          - "me.zhanghai.android.*"
+          - "com.github.jenly1314:*"
+          - "io.github.carguo:*"
+          - "com.github.CarGuo:*"
+          - "com.github.Moriafly:*"
+          - "io.github.rosemoe:*"
+          - "io.noties.markwon:*"
+          - "com.louiscad.splitties:*"
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: monthly
+    open-pull-requests-limit: 2
+    # Action major versions remain separate for runner compatibility review.
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
   - package-ecosystem: npm
-    directory: "modules/web"
+    directory: "/modules/web"
     schedule:
-      interval: "weekly"
+      interval: monthly
+    open-pull-requests-limit: 2
+    allow:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    ignore:
+      # This pre-1.0 package can change type-checking behavior on minor releases.
+      - dependency-name: "@vue/tsconfig"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    groups:
+      web-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
