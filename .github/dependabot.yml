@@ -1,4 +1,4 @@
-# Keep routine upgrades small; review toolchain migrations separately.
+# Routine updates for the Web frontend and JVM server only.
 # Security updates use GitHub's separate mechanism and PR limits.
 version: 2
 
@@ -26,7 +26,7 @@ updates:
       interval: monthly
     registries: "*"
     open-pull-requests-limit: 3
-    # Major upgrades (including AGP and Shadow) require a migration PR.
+    # Major JVM toolchain upgrades require a migration PR.
     allow:
       - dependency-name: "*"
         update-types: ["version-update:semver-minor", "version-update:semver-patch"]
@@ -41,13 +41,11 @@ updates:
       - dependency-name: "org.apache.commons:commons-text"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
     groups:
-      kotlin_KSP:
+      kotlin-toolchain:
         applies-to: version-updates
         patterns:
           - "org.jetbrains.kotlin:*"
           - "org.jetbrains.kotlin.*"
-          - "com.google.devtools.ksp"
-          - "com.google.devtools.ksp:*"
         update-types: ["minor", "patch"]
       server-libraries:
         applies-to: version-updates
@@ -63,24 +61,6 @@ updates:
           - "com.google.code.gson:*"
           - "com.jayway.jsonpath:*"
           - "cn.wanghaomiao:*"
-        update-types: ["minor", "patch"]
-      android-libraries:
-        applies-to: version-updates
-        patterns:
-          - "androidx.*"
-          - "com.android.*"
-          - "com.google.android.*"
-          - "com.google.firebase:*"
-          - "com.google.gms.*"
-          - "com.github.bumptech.glide:*"
-          - "me.zhanghai.android.*"
-          - "com.github.jenly1314:*"
-          - "io.github.carguo:*"
-          - "com.github.CarGuo:*"
-          - "com.github.Moriafly:*"
-          - "io.github.rosemoe:*"
-          - "io.noties.markwon:*"
-          - "com.louiscad.splitties:*"
         update-types: ["minor", "patch"]
 
   - package-ecosystem: github-actions

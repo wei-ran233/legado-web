@@ -287,6 +287,7 @@ fun Route.libraryRoutes() {
                 toc.map {
                     mapOf(
                         "index" to it.index,
+                        "url" to it.getAbsoluteURL(),
                         "title" to it.title,
                         "isVolume" to it.isVolume,
                         "wordCount" to it.wordCount,
@@ -308,6 +309,7 @@ fun Route.libraryRoutes() {
             call.respondJson(
                 mapOf(
                     "index" to chapter.index,
+                    "url" to chapter.getAbsoluteURL(),
                     "title" to chapter.title,
                     "content" to content,
                 )

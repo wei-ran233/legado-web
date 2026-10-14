@@ -445,6 +445,27 @@ object BookRepository {
                 it[start] = c.start
                 it[end] = c.end
                 it[variable] = c.variable
+                it[imgUrl] = c.imgUrl
+            }
+        }
+    }
+
+    fun updateChapters(vararg chapters: BookChapter) = transaction {
+        chapters.forEach { c ->
+            Chapters.update({ (Chapters.bookUrl eq c.bookUrl) and (Chapters.chapterIndex eq c.index) }) {
+                it[url] = c.url
+                it[title] = c.title
+                it[isVolume] = c.isVolume
+                it[baseUrl] = c.baseUrl
+                it[isVip] = c.isVip
+                it[isPay] = c.isPay
+                it[resourceUrl] = c.resourceUrl
+                it[tag] = c.tag
+                it[wordCount] = c.wordCount
+                it[start] = c.start
+                it[end] = c.end
+                it[variable] = c.variable
+                it[imgUrl] = c.imgUrl
             }
         }
     }
@@ -488,5 +509,6 @@ object BookRepository {
         start = it[Chapters.start]
         end = it[Chapters.end]
         variable = it[Chapters.variable]
+        imgUrl = it[Chapters.imgUrl]
     }
 }

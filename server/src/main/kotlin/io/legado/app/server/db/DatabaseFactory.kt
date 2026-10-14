@@ -40,7 +40,19 @@ object DatabaseFactory {
             runCatching { exec("ALTER TABLE book_sources ADD COLUMN is_text_clean BOOLEAN DEFAULT 1") }
             runCatching { exec("ALTER TABLE book_sources ADD COLUMN can_fetch_article BOOLEAN DEFAULT 1") }
             runCatching { exec("ALTER TABLE book_sources ADD COLUMN last_checked_at BIGINT DEFAULT 0") }
+            migrateChapterMetadata()
             migrateSourceCategories()
+        }
+    }
+
+    /** Idempotent migration for databases created before chapter image metadata existed. */
+    internal fun migrateChapterMetadata() {
+        val columns = mutableSetOf<String>()
+        org.jetbrains.exposed.sql.transactions.TransactionManager.current().exec("PRAGMA table_info(chapters)") { rows ->
+            while (rows.next()) columns.add(rows.getString("name"))
+        }
+        if ("img_url" !in columns) {
+            org.jetbrains.exposed.sql.transactions.TransactionManager.current().exec("ALTER TABLE chapters ADD COLUMN img_url TEXT")
         }
     }
 

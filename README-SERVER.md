@@ -29,8 +29,9 @@ modules/engine (纯 JVM 书源引擎)  ← 自 app 模块移植
 SQLite (Exposed, WAL) + data/ 文件目录
 ```
 
-> `app/` 安卓模块与 `modules/rhino`、`modules/book` 保持冻结不动；
-> 引擎代码已移植为纯 JVM 的 `modules/engine`（保留 `io.legado.app` 包名，桩化 Android 依赖）。
+> 本仓库仅维护 Web 前端、JVM 服务端和纯 JVM 的 `modules/engine`。
+> Android 历史源码仅保留作参考，不再参与构建；继承的 Firebase 配置已移除。
+> 保留 `io.legado.app` 包名以兼容移植的引擎代码。
 
 ## 快速开始（Docker）
 
@@ -54,8 +55,8 @@ docker compose logs | grep -A3 "管理员账号"
 依赖：JDK 17+（本机构建用 JDK 24 作为编译工具链）
 
 ```bash
-# 构建后端（SERVER_ONLY=1 跳过 Android 模块，无需 Android SDK）
-SERVER_ONLY=1 ./gradlew :server:installDist
+# 构建后端（无需 Android SDK）
+./gradlew :server:installDist
 
 # 构建前端（产物放 data/webapp 供服务器托管）
 cd modules/web && pnpm install && pnpm build-only && cd ..

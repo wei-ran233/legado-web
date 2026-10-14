@@ -20,9 +20,11 @@ package-lock.json
 .vscode
 
 # Server runtime data & cache
-data/
-server-smoke-data/
+/data/
+/server-smoke-data/
 *.db
 *.db*
 *.pid
-cleaner.pid
+cleaner.pid
+# Do not reintroduce inherited Firebase client configuration
+**/google-services.json
